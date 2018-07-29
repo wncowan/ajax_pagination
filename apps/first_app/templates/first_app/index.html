@@ -1,0 +1,111 @@
+<html>
+<head>
+	<title></title>
+	<script src="https://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+<style type="text/css">
+	form {
+		display: inline-block;
+	}
+</style>
+<body>
+<br>
+<div class = "container">
+	<form class="form-inline col-sm-4 searchNameForm">
+	{% csrf_token %}
+	  <div class="form-group">
+	    <label for="name">Name</label>
+	    <input type="text" name = "name" class="form-control" id="name" placeholder="Jane Doe" onkeyup="searchName()">
+	  </div>
+	</form>
+	<form class="form-inline col-sm-8 startDateForm">
+	{% csrf_token %}
+	  <div class="form-group col-sm-6">
+	    <label for="startDate">Start Date</label>
+	    <input type="date" name = "startDate" class="form-control" id="startDate">
+	  </div>
+	  <div class="form-group col-sm-6">
+	    <label for="endDate">End Date</label>
+	    <input type="date" name = "endDate" class="form-control" id="endDate">
+	  </div>
+	</form>
+	<div class = "changePageAjax">
+	<div class = "col-sm-4 col-sm-offset-8">
+		{% for i in usersCount%}
+		<form class = "changePageForm{{forloop.counter0}}">
+		{% csrf_token %}
+		<input type = "hidden" name = "pageNumber" value = "{{forloop.counter0}}">
+		<input type = "submit" value = '{{forloop.counter0|add:"1"}}'>
+		</form>
+		{% endfor %}
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>First Name</th>
+				<th>Last Name</th>
+				<th>Registered Time</th>
+				<th>Email</th>
+			</tr>
+		</thead>
+		<tbody>
+	{% for user in users %}
+			<tr>
+				<td>{{user.id}}</td>
+				<td>{{user.first_name}}</td>
+				<td>{{user.last_name}}</td>
+				<td>{{user.created_at}}</td>
+				<td>{{user.email}}</td>
+			</tr>
+	{% endfor %}
+		</tbody>
+	</table>
+	</div>
+</div>
+</body>
+
+<script type="text/javascript">
+{% for i in usersCount%}
+$('.changePageForm' + {{forloop.counter0}}).submit(function(e) {
+	e.preventDefault();
+	console.log('submit')
+    $.ajax({
+      url: '/changePage',
+      method: 'post',
+      data: $(this).serialize(),
+      success: function(serverResponse){
+      	$('.changePageAjax').html(serverResponse)
+      }
+    })
+})
+{% endfor %}
+
+var searchName = function() {
+	console.log('key press')
+    $.ajax({
+      url: '/searchName',
+      method: 'post',
+      data: $('.searchNameForm').serialize(),
+      success: function(serverResponse){
+      	$('.changePageAjax').html(serverResponse)
+      }
+    })
+}
+
+$('.startDateForm').on('focusout', function() {
+	console.log('start date focus out')
+	$.ajax({
+      url: '/startDate',
+      method: 'post',
+      data: $(this).serialize(),
+      success: function(serverResponse){
+      	$('.changePageAjax').html(serverResponse)
+      }
+    })
+})
+
+</script>
+</html>

@@ -1,0 +1,48 @@
+<div class = "col-sm-4 col-sm-offset-8">
+        {% for i in usersCount%}
+        <form class = "changePageForm{{forloop.counter0}}">
+        {% csrf_token %}
+        <input type = "hidden" name = "pageNumber" value = "{{forloop.counter0}}">
+        <input type = "submit" value = '{{forloop.counter0|add:"1"}}'>
+        </form>
+        {% endfor %}
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Registered Time</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+    {% for user in users %}
+            <tr>
+                <td>{{user.id}}</td>
+                <td>{{user.first_name}}</td>
+                <td>{{user.last_name}}</td>
+                <td>{{user.created_at}}</td>
+                <td>{{user.email}}</td>
+            </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+    
+    <script type="text/javascript">
+    {% for i in usersCount%}
+    $('.changePageForm' + {{forloop.counter0}}).submit(function(e) {
+        e.preventDefault();
+        console.log('submit')
+        $.ajax({
+          url: '/changePage',
+          method: 'post',
+          data: $(this).serialize(),
+          success: function(serverResponse){
+              $('.changePageAjax').html(serverResponse)
+          }
+        })
+    })
+    {% endfor %}
+    </script>
